@@ -75,15 +75,11 @@ data class Pet(
     }
 }
 
-
 class PetsViewModel : ViewModel() {
-
 
     val pets: List<Pet> = DUMMY_DATA
 
     val pet: Map<Long, Pet> by lazy { DUMMY_DATA.associateBy { it.id } }
-
-
 }
 
 class MainActivity : AppCompatActivity() {
@@ -97,9 +93,11 @@ class MainActivity : AppCompatActivity() {
                     composable("/") { PetsOverviewPage(navController) }
                     composable(
                         "pet/{petId}",
-                        arguments = listOf(navArgument("petId") {
-                            type = NavType.LongType
-                        })
+                        arguments = listOf(
+                            navArgument("petId") {
+                                type = NavType.LongType
+                            }
+                        )
                     ) { backStackEntry ->
                         PetsDetailView(
                             navController,
@@ -146,7 +144,6 @@ fun PetListView(pet: Pet, onPetClicked: () -> Unit) {
     }
 }
 
-
 @Composable
 fun PetImageView(pet: Pet, modifier: Modifier = Modifier) {
     Text(
@@ -188,7 +185,6 @@ fun PetFactView(pet: Pet, modifier: Modifier) {
             }
         }
     }
-
 }
 
 @Preview
@@ -217,7 +213,8 @@ fun PetsDetailView(navController: NavHostController, petId: Long?) {
 
                 contentColor = MaterialTheme.colors.primary,
                 backgroundColor = MaterialTheme.colors.background,
-                title = { })
+                title = { }
+            )
         }
     ) {
         Surface(
@@ -251,5 +248,3 @@ fun PetsDetailView(navController: NavHostController, petId: Long?) {
         }
     }
 }
-
-
