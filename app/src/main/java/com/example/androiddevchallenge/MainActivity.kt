@@ -31,25 +31,33 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import com.example.androiddevchallenge.data.DUMMY_DATA
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
 data class Pet(
     val id: Long,
-    val name: String
-)
+    val name: String,
+    val animalType: AnimalType,
+    val gender: Gender,
+    val yearOfBirth: Short,
+    val historySummary: String
+) {
+    enum class Gender {
+        Male, Female, Diverse
+    }
+
+    sealed class AnimalType {
+        object Cat : AnimalType()
+        data class Dog(val breed: String) : AnimalType()
+    }
+}
 
 class PetsViewModel : ViewModel() {
 
-    private val petsDataStore: Map<Long, Pet> = hashMapOf(
-        0L to Pet(0, "Aaliyah"),
-        1L to Pet(1, "Asterix"),
-        2L to Pet(2, "Rocky"),
-        3L to Pet(3, "Mara")
-    )
 
-    val pets: List<Pet> = petsDataStore.map { it.value }
+    val pets: List<Pet> = DUMMY_DATA
 
-    val pet: Map<Long, Pet> = petsDataStore
+    val pet: Map<Long, Pet> by lazy { DUMMY_DATA.associateBy { it.id } }
 
 
 }
