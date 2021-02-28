@@ -19,13 +19,17 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -36,8 +40,9 @@ import com.example.androiddevchallenge.ui.theme.MyTheme
 
 data class Pet(
     val id: Long,
+    val icon: String = "\uD83D\uDC3E",
     val name: String,
-    val animalType: AnimalType,
+    val animalType: Species,
     val gender: Gender,
     val yearOfBirth: Short,
     val historySummary: String
@@ -46,11 +51,15 @@ data class Pet(
         Male, Female, Diverse
     }
 
-    sealed class AnimalType {
-        object Cat : AnimalType()
-        data class Dog(val breed: String) : AnimalType()
+    sealed class Species(private val name: String) {
+
+        open val displayName = name
+
+        object Cat : Species("Cat")
+        data class Dog(val breed: String) : Species("Dog")
     }
 }
+
 
 class PetsViewModel : ViewModel() {
 
@@ -105,7 +114,72 @@ fun PetsOverviewPage(navController: NavHostController) {
 
 @Composable
 fun PetListView(pet: Pet, onPetClicked: () -> Unit) {
-    Text(text = pet.name, Modifier.clickable { onPetClicked() })
+    Card(
+        Modifier
+            .padding(8.dp)
+            .clickable { onPetClicked() }
+    ) {
+        Row(Modifier.padding(4.dp)) {
+            PetImageView(
+                pet,
+                Modifier
+                    .fillMaxSize()
+                    .weight(0.4F, true)
+            )
+            PetFactView(pet, Modifier.weight(0.6F))
+        }
+    }
+}
+
+
+@Composable
+fun PetImageView(pet: Pet, modifier: Modifier = Modifier) {
+    Text(
+        text = pet.icon,
+        fontSize = 50.sp,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun PetFactView(pet: Pet, modifier: Modifier) {
+    Column(modifier) {
+        // Headline
+        Text(
+            text = pet.name,
+            maxLines = 1,
+            style = MaterialTheme.typography.h4,
+            color = MaterialTheme.colors.primary
+        )
+
+        // Description
+        Row {
+            Column(Modifier.weight(0.5F, fill = true)) {
+                Text(text = "Species")
+                Text(
+                    text = pet.animalType.displayName,
+                    style = MaterialTheme.typography.h6,
+                    maxLines = 1
+                )
+            }
+            Column(Modifier.weight(0.5F, fill = true)) {
+                Text(text = "Gender")
+                Text(
+                    text = pet.gender.name,
+                    style = MaterialTheme.typography.h6,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+
+}
+
+@Preview
+@Composable
+fun previewPetListView() {
+    PetListView(pet = DUMMY_DATA[0], onPetClicked = { /*TODO*/ })
 }
 
 @Composable
@@ -113,8 +187,54 @@ fun PetsDetailView(navController: NavHostController, petId: Long?) {
 
     val viewModel: PetsViewModel = viewModel()
     val pet = viewModel.pet[petId]!!
-    Surface(color = MaterialTheme.colors.background) {
-        Text(text = pet.name)
-    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(
+                            painterResource(id = android.R.drawable.ic_menu_close_clear_cancel),
+                            "back"
+                        )
+                    }
+                },
+                elevation = 0.dp,
 
+                contentColor = MaterialTheme.colors.primary,
+                backgroundColor = MaterialTheme.colors.background,
+                title = { })
+        }
+    ) {
+        Surface(
+            color = MaterialTheme.colors.background,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .weight(0.5F, true)
+                    ) {
+                        PetImageView(pet)
+                    }
+                    PetFactView(pet, Modifier.weight(0.5F))
+                }
+                Text(
+                    text = "History",
+                    style = MaterialTheme.typography.h5,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = pet.historySummary,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
 }
+
+
